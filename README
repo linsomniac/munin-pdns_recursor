@@ -1,0 +1,28 @@
+This is a series of plugins for munin to graph information about pdns_recursor.
+
+Written by Sean Reifschneider of tummy.com, ltd.
+Placed in the public domain.
+
+INSTALLING
+
+   Copy the pdns_rec* files to /etc/munin/plugins
+
+   Set up plugins to run as root (rec_control has to run as root, not pdns,
+   not munin, graphs won't update if this is not set):
+
+      echo '[pdns_rec_*]' >/etc/munin/plugin-conf.d/pdns_rec
+      echo 'user root' >>/etc/munin/plugin-conf.d/pdns_rec
+
+   Re-start munin-node.
+
+NON-DEFAULT REC_CONTROL PATH
+
+   There is a configuration value called "rec_control" which can be set to
+   the path to the rec_control program.  The default for this is
+   /usr/bin/rec_control.
+
+   For example, in the plugin-conf you can do:
+
+      [pdns_rec_*]
+      user root
+      rec_control /usr/local/bin/rec_control

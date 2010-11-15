@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+#  pdns_recursor munin plugin.
+#  Written by Sean Reifschneider <jafo@tummy.com> 2009-12-03
+#  Placed in the public domain
+#
+#  Requires running as root:
+#
+#    echo '[pdns_rec_*]' >/etc/munin/plugin-conf.d/pdns_rec
+#    echo 'user root' >>/etc/munin/plugin-conf.d/pdns_rec
+#
+#  Configuration variables:
+#
+#    rec_control:    Path to rec_control executable
+#                    (default: /usr/bin/rec_control)
+
+REC_CONTROL="${rec_control:-/usr/bin/rec_control}"
+
+if [ "$1" = "autoconf" ]; then
+	if [ -e "$REC_CONTROL" ]; then
+		echo yes
+		exit 0
+	else
+		echo no
+		exit 1
+	fi
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title PDNS Recursor Exceptions'
+	echo 'graph_order spoofs resource client server overflow'
+	echo 'graph_vlabel queries'
+	echo 'graph_info Exceptional queries'
+	echo 'graph_category pdns'
+
+	echo 'spoofs.label spoofs'
+	echo 'spoofs.colour ff0000'
+	echo 'spoofs.min 0'
+	echo 'spoofs.max 1000000'
+	echo 'spoofs.type DERIVE'
+	echo 'spoofs.info Spoofs prevented'
+
+	echo 'resource.label resources'
+	echo 'resource.colour f0ff00'
+	echo 'resource.min 0'
+	echo 'resource.max 1000000'
+	echo 'resource.type DERIVE'
+	echo 'resource.info Denied because of resource limits'
+
+	echo 'client.label client'
+	echo 'client.colour ffd200'
+	echo 'client.min 0'
+	echo 'client.max 1000000'
+	echo 'client.type DERIVE'
+	echo 'client.info Client parse errors'
+
+	echo 'server.label server'
+	echo 'server.colour ff00ff'
+	echo 'server.min 0'
+	echo 'server.max 1000000'
+	echo 'server.type DERIVE'
+	echo 'server.info Server parse errors'
+
+	echo 'overflow.label tcp concurrency'
+	echo 'overflow.colour b02500'
+	echo 'overflow.min 0'
+	echo 'overflow.max 1000000'
+	echo 'overflow.type DERIVE'
+	echo 'overflow.info TCP client concurrency limit'
+
+	exit 0
+fi
+
+echo spoofs.value `"$REC_CONTROL" get spoof-prevents`
+echo resource.value `"$REC_CONTROL" get resource-limits`
+echo client.value `"$REC_CONTROL" get client-parse-errors`
+echo server.value `"$REC_CONTROL" get server-parse-errors`
+echo overflow.value `"$REC_CONTROL" get tcp-client-overflow`
+
+exit 0

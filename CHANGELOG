@@ -1,0 +1,42 @@
+1.03 -- 2009-12-11
+
+   * I had missed one "seconds" reference in querylatency graph, converted
+     back to "usec".
+
+1.02 -- 2009-12-11
+
+   * Changing the colors in the Exceptions graph.
+
+   * Removing the usec to sec conversion.
+
+1.01 -- 2009-12-10
+
+   Changes based on review from Nicolai Langfeldt:
+
+      * The pdns_rec_answers plugin has non-mnemonic data series names.  If
+        anyone wants to make a ".max" override and then gets back to
+        it later it's not immediately obvious what the override is for.
+        IMHO unfortunate.
+
+      * pdns_rec_cache_size should probably use AREA/STACK or LINE/STACK to
+        visualize the total cache size.
+        http://munin.projects.linpro.no/wiki/fieldname.draw
+
+      * You probably want to use DERIVE rather than COUNTER in most places.
+        http://munin.projects.linpro.no/wiki/fieldname.type
+
+      * RRD scales SI units so that if pdns_rec_querylatency reports time in
+        seconds then RRD will show in ms or s or even kilo-seconds as
+        apropriate.  If you want to keep it in "ms" you probably also want
+        to do "graph_scale no" to avoid seeing kilo-ms in the graph :-)
+
+      * You can use .colour XXXXXX (RGB colour hex without the leading #) to
+        specify the drawing colour for plugins where that gives right
+        associations when viewing, e.g. maybe use red or yellow in the
+        pdns_rec_throttle plugin.
+
+      * Configurable rec_control path
+
+1.00 -- 2009-12-08
+
+   Initial release

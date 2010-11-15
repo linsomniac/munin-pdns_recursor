@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+#  pdns_recursor munin plugin.
+#  Written by Sean Reifschneider <jafo@tummy.com> 2009-12-03
+#  Placed in the public domain
+#
+#  Requires running as root:
+#
+#    echo '[pdns_rec_*]' >/etc/munin/plugin-conf.d/pdns_rec
+#    echo 'user root' >>/etc/munin/plugin-conf.d/pdns_rec
+#
+#  Configuration variables:
+#
+#    rec_control:    Path to rec_control executable
+#                    (default: /usr/bin/rec_control)
+
+REC_CONTROL="${rec_control:-/usr/bin/rec_control}"
+
+if [ "$1" = "autoconf" ]; then
+	if [ -e "$REC_CONTROL" ]; then
+		echo yes
+		exit 0
+	else
+		echo no
+		exit 1
+	fi
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title PDNS Cache Size'
+	echo 'graph_order negative entries'
+	echo 'graph_vlabel entries'
+	echo 'graph_info Size of the cache'
+	echo 'graph_category pdns'
+
+	echo 'negative.label Negative entries'
+	echo 'negative.min 0'
+	echo 'negative.type GAUGE'
+	echo 'negative.draw LINE2'
+	echo 'negative.info Cache negative entries'
+
+	echo 'entries.label Entries'
+	echo 'entries.min 0'
+	echo 'entries.type GAUGE'
+	echo 'entries.draw STACK'
+	echo 'entries.info Cache entries'
+
+	exit 0
+fi
+
+echo entries.value `"$REC_CONTROL" get cache-entries`
+echo negative.value `"$REC_CONTROL" get negcache-entries`
+
+exit 0

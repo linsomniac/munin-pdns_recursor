@@ -1,0 +1,82 @@
+#!/bin/sh
+#
+#  pdns_recursor munin plugin.
+#  Written by Sean Reifschneider <jafo@tummy.com> 2009-12-03
+#  Placed in the public domain
+#
+#  Requires running as root:
+#
+#    echo '[pdns_rec_*]' >/etc/munin/plugin-conf.d/pdns_rec
+#    echo 'user root' >>/etc/munin/plugin-conf.d/pdns_rec
+#
+#  Configuration variables:
+#
+#    rec_control:    Path to rec_control executable
+#                    (default: /usr/bin/rec_control)
+
+REC_CONTROL="${rec_control:-/usr/bin/rec_control}"
+
+if [ "$1" = "autoconf" ]; then
+	if [ -e "$REC_CONTROL" ]; then
+		echo yes
+		exit 0
+	else
+		echo no
+		exit 1
+	fi
+fi
+
+if [ "$1" = "config" ]; then
+	echo 'graph_title PDNS Recursor Answer Times'
+	echo 'graph_order onems tenms hundredms onesec aboveonesec timeout'
+	echo 'graph_vlabel queries'
+	echo 'graph_info Time required per answer.'
+	echo 'graph_category pdns'
+
+	echo 'onems.label in 1ms'
+	echo 'onems.min 0'
+	echo 'onems.max 1000000'
+	echo 'onems.type DERIVE'
+	echo 'onems.info Answers within 1ms.'
+
+	echo 'tenms.label in 10ms'
+	echo 'tenms.min 0'
+	echo 'tenms.max 1000000'
+	echo 'tenms.type DERIVE'
+	echo 'tenms.info Answers from 1ms to 10ms.'
+
+	echo 'hundredms.label in 100ms'
+	echo 'hundredms.min 0'
+	echo 'hundredms.max 1000000'
+	echo 'hundredms.type DERIVE'
+	echo 'hundredms.info Answers within 10ms to 100ms.'
+
+	echo 'onesec.label in 1s'
+	echo 'onesec.min 0'
+	echo 'onesec.max 1000000'
+	echo 'onesec.type DERIVE'
+	echo 'onesec.info Answers within 100ms to 1s.'
+
+	echo 'aboveonesec.label over 1s'
+	echo 'aboveonesec.min 0'
+	echo 'aboveonesec.max 1000000'
+	echo 'aboveonesec.type DERIVE'
+	echo 'aboveonesec.info Answers requiring more than 1s.'
+
+	echo 'timeout.label timeouts'
+	echo 'timeout.min 0'
+	echo 'timeout.max 1000000'
+	echo 'timeout.type DERIVE'
+	echo 'timeout.info Answers that never came.'
+
+	exit 0
+fi
+
+echo onems.value `"$REC_CONTROL" get answers0-1`
+echo tenms.value `"$REC_CONTROL" get answers1-10`
+echo hundredms.value `"$REC_CONTROL" get answers10-100`
+echo onesec.value `"$REC_CONTROL" get answers100-1000`
+echo aboveonesec.value `"$REC_CONTROL" get answers-slow`
+echo timeout.value `"$REC_CONTROL" get outgoing-timeouts`
+
+exit 0
